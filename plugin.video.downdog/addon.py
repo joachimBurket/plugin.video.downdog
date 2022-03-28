@@ -1,6 +1,6 @@
 #!/usr/bin/python
-from resources.lib.main import plugin
-
+from resources.lib.plugin import Plugin
 
 if __name__ == "__main__":
+    plugin = Plugin()
     plugin.run()

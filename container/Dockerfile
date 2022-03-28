@@ -18,6 +18,7 @@ RUN apt update && \
     add-apt-repository -y ppa:team-xbmc/ppa && \
     apt -y purge openssl software-properties-common && \
     apt install -y --no-install-recommends dumb-init \
+                                           vim \
                                            # Without pulseaudio Kodi logs are unreadble and useless
                                            pulseaudio \
                                            # This needs for establishing SSL connections 
@@ -25,7 +26,8 @@ RUN apt update && \
                                            # Tigervnc implements an X server and provides VNC access
                                            tigervnc-standalone-server \
                                            tigervnc-xorg-extension \
-                                           kodi && \
+                                           kodi \
+                                           kodi-inputstream-adaptive && \
                                            #kodi=2:${KODI_VERSION}+* && \
     apt -y --purge autoremove
 

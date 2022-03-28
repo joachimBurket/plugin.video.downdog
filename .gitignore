@@ -76,3 +76,7 @@ venv.bak/
 # Ignore all local history of files
 .history
 .ionide
+
+### Misc ###
+secrets.py
+*.zip

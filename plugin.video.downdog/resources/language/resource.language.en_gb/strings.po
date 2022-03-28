@@ -1,0 +1,41 @@
+# XBMC Media Center language file
+# Addon Name: Down Dog
+# Addon id: plugin.video.downdog
+msgid ""
+msgstr ""
+
+### Settings Menu
+
+msgctxt "#30001"
+msgid "API"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Username"
+msgstr ""
+
+msgctxt "#30003"
+msgid "Password"
+msgstr ""
+
+msgctxt "#30040"
+msgid "Debugging"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Enable Debugging"
+msgstr ""
+
+### Addon texts
+
+msgctxt "#31001"
+msgid "DownDog account credentials missing"
+msgstr ""
+
+msgctxt "#31002"
+msgid "Your DownDog username and password must be passed in order to use this addon."
+msgstr ""
+
+msgctxt "#31003"
+msgid "New Session"
+msgstr ""

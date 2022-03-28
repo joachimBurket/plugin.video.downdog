@@ -1,13 +1,11 @@
 # Downdog app
 
-
-
 ### Login
 
 POST https://www.downdogapp.com/json/login
 
 * Request:
-
+  
   ```
   email=joachim-b@hotmail.fr
   password=pouet
@@ -21,30 +19,26 @@ POST https://www.downdogapp.com/json/login
   ```
 
 * Response:
-
+  
   ```
   {"cred":"A1M2JRLK6DI-AAJAF97C34I-cfkcjk9j3j0275sptg28lhu3t2","type":"SUCCESS"}
   ```
-
-
 
 Cookie:
 
 ```json
 {
-	"cred": "A1M2JRLK6DI-AAJAF97C34I-cfkcjk9j3j0275sptg28lhu3t2",
-	"G_ENABLED_IDPS": "google"
+    "cred": "A1M2JRLK6DI-AAJAF97C34I-cfkcjk9j3j0275sptg28lhu3t2",
+    "G_ENABLED_IDPS": "google"
 }
 ```
-
-
 
 ### Endpoints
 
 * POST https://www.downdogapp.com/manifest: Pleins de métadata
-
+  
   * Request: 
-
+    
     ```
     deviceDescription=Firefox 90.0
     osVersion=Linux
@@ -54,17 +48,17 @@ Cookie:
     languageOption
     cred=A1M2JRLK6DI-ALSCIIJKJ04-cgtv84d8ijdmdnr4p57ulhsk2t
     ```
-
+  
   * Response:
-
+    
     ```
     
     ```
 
 * POST https://www.downdogapp.com/json/lengthOptions: Durées de session disponibles
-
+  
   * Request:
-
+    
     ```
     settings={"16":0,"17":5,"15":3,"8":15,"18":1,"1":0,"3":0,"2":0,"6":8,"0":0}
     deviceDescription=Firefox 90.0
@@ -75,18 +69,17 @@ Cookie:
     languageOption
     cred=A1M2JRLK6DI-ALSCIIJKJ04-cgtv84d8ijdmdnr4p57ulhsk2t
     ```
-
+  
   * Response:
-
+    
     ```
     lengthOptionIds: [5, 6, 7, 8, ...]
     ```
 
-    
-
 * POST https://www.downdogapp.com/json/history: Historiques des sessions
+  
   * Request:
-
+    
     ```
     deviceDescription=Firefox 90.0
     osVersion=Linux
@@ -96,9 +89,9 @@ Cookie:
     languageOption
     cred=A1M2JRLK6DI-ALSCIIJKJ04-cgtv84d8ijdmdnr4p57ulhsk2t
     ```
-
+  
   * Response:
-
+    
     ```json
     {
       "items": [
@@ -153,15 +146,15 @@ Cookie:
            },
            "proportionCompleted": 1.0
         },
-    	{ ... }
+        { ... }
       ]
     }
     ```
 
 * POST https://www.downdogapp.com/json/generate: Générer une session
-
+  
   * Request:
-
+    
     ```
     settings={"16":0,"17":5,"15":3,"8":15,"18":1,"1":0,"3":0,"2":0,"6":8,"0":0}
     deviceDescription=Firefox 90.0
@@ -172,9 +165,9 @@ Cookie:
     languageOption
     cred=A1M2JRLK6DI-ALSCIIJKJ04-cgtv84d8ijdmdnr4p57ulhsk2t
     ```
-
+  
   * Response:
-
+    
     ```json
     {
       "sequence": {
@@ -268,9 +261,9 @@ Cookie:
     ```
 
 * POST https://www.downdogapp.com/json/playbackUrl: Récupérer l'URL de la vidéo
-
+  
   * Request:
-
+    
     ```
     sequenceId=AIKYLS9RYDJ
     playlistId=ADY99K45TXQ
@@ -292,30 +285,113 @@ Cookie:
     languageOption
     cred=A1M2JRLK6DI-ALSCIIJKJ04-cgtv84d8ijdmdnr4p57ulhsk2t
     ```
-
+  
   * Response:
-
+    
     ```json
-    { 	
+    {     
       "url":"https://stitched.downdogapp.com/master_xvTiycRL_AIKYLS9RYDJ.m3u8",
-    	"videoOffsetTime":{
+        "videoOffsetTime":{
        "seconds":0.0
      }
     }
     ```
 
-* GET https://stitched.downdogapp.com/master_xvTiycRL_AIKYLS9RYDJ.m3u8: Start playback
-
+* GET https://stitched.downdogapp.com/master_xvTiycRL_AIKYLS9RYDJ.m3u8: Get video and audio base URLs
+  
   * Response (vnd.apple.mpegurl):
-
+    
     ```
     #EXTM3U
     #EXT-X-VERSION:6
     #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="group_audio",NAME="audio_1",DEFAULT=YES,LANGUAGE="en",URI="1_xvTiycRL_AIKYLS9RYDJ.m3u8"
     #EXT-X-STREAM-INF:BANDWIDTH=792000,RESOLUTION=1280x720,CODECS="avc1.4d401f,mp4a.40.2",AUDIO="group_audio"
-    0_xvTiycRL_AIKYLS9RYDJ.m3u8
+    0_xvTiycRL_AIKYLS9RYDJ.m3u8 => GET on this to get video URLs list
     ```
 
+* GET https://stitched.downdogapp.com/0_xvTiycRL_AIKYLS9RYDJ.m3u8: Get video stream URLs:
+  * Response:
     
-
-* GET 
+    ```
+    #EXTM3U
+    #EXT-X-VERSION:6
+    #EXT-X-TARGETDURATION:6
+    #EXT-X-MEDIA-SEQUENCE:0
+    #EXT-X-PLAYLIST-TYPE:EVENT
+    #EXT-X-START:TIME-OFFSET=0
+    #EXT-X-INDEPENDENT-SEGMENTS
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/0000_0_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/0001_0_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/0002_0_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/0003_0_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/0004_0_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/0005_0_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/0006_0_xvTiycRL_AIKYLS9RYDJ.ts
+    [....]
+    https://stitched.downdogapp.com/blackfGHTOZsD_0_382.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/blackfGHTOZsD_0_383.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/blackfGHTOZsD_0_384.ts
+    #EXTINF:6.000000,
+    https://stitched.downdogapp.com/blackfGHTOZsD_0_385.ts
+    #EXT-X-ENDLIST
+    ```
+    
+    
+    
+* GET https://stitched.downdogapp.com/1_xvTiycRL_AIKYLS9RYDJ.m3u8: Get audio stream URLs
+  * Response:
+  * ```
+    #EXTM3U
+    #EXT-X-VERSION:6
+    #EXT-X-TARGETDURATION:6
+    #EXT-X-MEDIA-SEQUENCE:0
+    #EXT-X-PLAYLIST-TYPE:EVENT
+    #EXT-X-START:TIME-OFFSET=0
+    #EXTINF:6.013967,
+    https://stitched.downdogapp.com/0000_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990756,
+    https://stitched.downdogapp.com/0001_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.013967,
+    https://stitched.downdogapp.com/0002_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990744,
+    https://stitched.downdogapp.com/0003_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990756,
+    https://stitched.downdogapp.com/0004_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.013967,
+    https://stitched.downdogapp.com/0005_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990744,
+    https://stitched.downdogapp.com/0006_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.013967,
+    https://stitched.downdogapp.com/0007_1_xvTiycRL_AIKYLS9RYDJ.ts
+    [...]
+    #EXTINF:6.013967,
+    https://stitched.downdogapp.com/0378_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990744,
+    https://stitched.downdogapp.com/0379_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990744,
+    https://stitched.downdogapp.com/0380_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.013978,
+    https://stitched.downdogapp.com/0381_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990744,
+    https://stitched.downdogapp.com/0382_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990744,
+    https://stitched.downdogapp.com/0383_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:6.013967,
+    https://stitched.downdogapp.com/0384_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXTINF:5.990756,
+    https://stitched.downdogapp.com/0385_1_xvTiycRL_AIKYLS9RYDJ.ts
+    #EXT-X-ENDLIST
+    ```
+    
+    
+    
+* 
