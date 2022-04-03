@@ -1,10 +1,6 @@
 import json
-import requests
-import os
 import sys
-from datetime import datetime, timezone
 from urllib.parse import urlencode, parse_qsl
-from pathlib import Path
 
 import xbmc
 import xbmcaddon
@@ -16,7 +12,6 @@ import inputstreamhelper
 from resources.lib.logger import Logger
 from resources.lib.settings import Settings
 from resources.lib.client import DownDogApiClient
-
 
 class DownDogSessionParameters:
 
@@ -144,17 +139,23 @@ class Plugin(object):
     
 
     def __init__(self):
+        # strings translation
+        self.tr = self.ADDON.getLocalizedString
+
         self.logger = Logger(self)
         self._create_dir_if_doesnt_exists(self.USERDATA_PATH)
         self.session_params = DownDogSessionParameters(self)
+
+        # Check that DownDog account credentials are passed
+        while self.settings.username == "" or self.settings.password == "":
+            xbmcgui.Dialog().ok(self.tr(31001), self.tr(31002))
+            self.ADDON.openSettings()
+
         self.api_client = DownDogApiClient(
             self,
             self.DOWNDOG_BASE_URL,
             {"username": self.settings.username, "password": self.settings.password}
         )
-
-        # strings translation
-        self.tr = self.ADDON.getLocalizedString
 
     def _create_dir_if_doesnt_exists(self, dir_path: str):
         """Creates a folder if it doesnt exists"""
@@ -168,73 +169,6 @@ class Plugin(object):
     def _url(self, **kwargs):
         """Constructs the plugin's URL"""
         return f"{self.PLUGIN_URL}?{urlencode(kwargs)}"
-    
-    def _get_session_types(self):
-        """Returns the list of folders in the addon_data directory"""
-        dirs, _files = xbmcvfs.listdir(self.USERDATA_PATH)
-        return dirs
-
-    def start_addon(self):
-        """Either starting a new session or listing previous one"""
-        new = xbmcgui.Dialog().yesno(
-            heading="New session?",
-            message="Start a new session or browse history?",
-            yeslabel="New session",
-            nolabel="Browse history",
-        )
-
-        if new:
-            self.new_session()
-        else:
-            self.list_session_types()
-
-    def list_session_types(self):
-        """list the types of the previous sessions done"""
-        xbmcplugin.setPluginCategory(self.HANDLE, f"Previous sessions categories")
-        xbmcplugin.setContent(self.HANDLE, "videos")
-        
-        session_types = self._get_session_types()
-        self.logger.debug(f"List session_types called: {session_types}")
-        for session_type in session_types:
-            cat_li = xbmcgui.ListItem(label=session_type)
-            cat_li.setInfo("video", {"title": session_type,
-                                    "genre": session_type,
-                                    "mediatype": "video"})
-            xbmcplugin.addDirectoryItem(
-                handle=self.HANDLE,
-                url=self._url(action="list", session_type=session_type),
-                listitem=cat_li, 
-                isFolder=True
-            )
-        
-        xbmcplugin.endOfDirectory(self.HANDLE)
-
-    def _get_sessions(self, session_type: str):
-        """Returns the list of session files in the session_type directory"""
-        session_dir = os.path.join(self.USERDATA_PATH, session_type)
-        sessions = []
-        _dirs, files = xbmcvfs.listdir(session_dir)
-        for file in files:
-            with open(os.path.join(session_dir, file), "r") as f:
-                url = f.read()
-                sessions.append({"name": file, "url": url})
-        return sessions
-
-    def list_sessions(self, session_type: str):
-        """List the previous session done"""
-        xbmcplugin.setPluginCategory(self.HANDLE, f"Previous \"{session_type}\" sessions")
-        xbmcplugin.setContent(self.HANDLE, "videos")
-
-        sessions = self._get_sessions(session_type)
-        self.logger.debug(f"List session called: {sessions}")
-        for session in sessions:
-            session_li = xbmcgui.ListItem(label=session["name"])
-            session_li.setInfo("video", {"title": session["name"],
-                                    "mediatype": "video"})
-            session_li.setProperty("IsPlayable", "true")
-            xbmcplugin.addDirectoryItem(self.HANDLE, self._url(action="play", video=session["url"]), session_li, isFolder=False)
-        xbmcplugin.addSortMethod(self.HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
-        xbmcplugin.endOfDirectory(self.HANDLE)
 
     def _session_config_dialog(self):
         self.logger.debug("Opening session config dialog")
@@ -258,15 +192,8 @@ class Plugin(object):
         res = self.api_client.playback_url(sequence_id, playlist_id, self.session_params.get_video_settings())
         url = res["url"]
         self.logger.debug(f"Playback URL: {url}")
-
-        # Save the m3u url in a file
-        self._create_dir_if_doesnt_exists(os.path.join(self.USERDATA_PATH, self.session_params.session_type))
-        now = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
-        session_name = f"{now}"
-        video_path = os.path.join(self.USERDATA_PATH, self.session_params.session_type, session_name)
-        with open(video_path, "w") as f:
-            f.write(url)
         
+        session_name = f"{self.session_params.session_type} session"
         session_li = xbmcgui.ListItem(label=session_name)
         session_li.setInfo("video", {"title": session_name,
                                     "mediatype": "video"}
@@ -274,7 +201,7 @@ class Plugin(object):
         session_li.setProperty("IsPlayable", "true")
         xbmcplugin.addDirectoryItem(self.HANDLE, self._url(action="play", video=url), session_li, isFolder=False)
         xbmcplugin.endOfDirectory(self.HANDLE)
-        # self.start_session(url)   # TODO: Doesn't work to start session directly
+        # self.start_session(url)   # TODO: Find a way to start session directly (without showing directory first)
 
     def start_session(self, video: str):
         """Start playing a session"""
@@ -293,24 +220,17 @@ class Plugin(object):
     def router(self, paramstring):
         params = dict(parse_qsl(paramstring))
         if params:
-            if params["action"] == "list":
-                self.list_sessions(params["session_type"])
-            elif params["action"] == "play":
+            if params["action"] == "play":
                 self.start_session(params["video"])
             else:
                 raise ValueError(f"Invalid paramstring {paramstring}!")
         else:
             # Called without params
-            self.start_addon()
+            self.new_session()
 
     def run(self):
         self.logger.debug("Starting plugin DownDog!")
         self.logger.debug(f"Argv: {sys.argv}, type argv[2]: {type(sys.argv[2])}")
-
-        # Check that DownDog account credentials are passed
-        if self.settings.username == "" or self.settings.password == "":
-            xbmcgui.Dialog().ok(self.tr(31001), self.tr(31002))
-            self.ADDON.openSettings()
 
         self.router(sys.argv[2][1:])
 
